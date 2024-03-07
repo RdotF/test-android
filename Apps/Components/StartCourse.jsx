@@ -2,11 +2,17 @@ import { View, Text, TouchableOpacity, Touchable } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Colors from '../Screens/Utils/Colors';
 
-export default function StartCourse({ userEnrollment, item, onStartPress, onContinuePress }) {
+export default function StartCourse({
+	userEnrollCourse,
+	item,
+	onStartPress,
+	onContinuePress,
+	chapter,
+}) {
 	useEffect(() => {}, []);
 	return (
 		<>
-			{item?.chapter?.length ? (
+			{chapter?.length ? (
 				<View
 					style={{
 						padding: 15,
@@ -17,7 +23,7 @@ export default function StartCourse({ userEnrollment, item, onStartPress, onCont
 						marginBottom: 20,
 					}}
 				>
-					{userEnrollment?.length > 0 ? (
+					{userEnrollCourse?.length > 0 ? (
 						<TouchableOpacity onPress={() => onContinuePress()}>
 							<Text
 								style={{

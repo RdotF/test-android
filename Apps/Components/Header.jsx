@@ -1,7 +1,6 @@
 import { View, Text, Image, TextInput, StyleSheet, Button, TouchableOpacity } from 'react-native';
 import React from 'react';
 import Colors from '../Screens/Utils/Colors';
-import { Ionicons } from '@expo/vector-icons';
 
 export default function Header() {
 	return (

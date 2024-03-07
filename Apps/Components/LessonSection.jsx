@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import SectionHeading from './SectionHeading';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,21 +8,27 @@ import { useState } from 'react';
 
 export default function LessonSection({
 	item,
-	userEnrollment,
+	userEnrollCourse,
 	onChapterSelect,
 	selectedChapter = {},
+	chapter,
+	completeChapter,
 }) {
+	useEffect(() => {
+		//userEnrollCourse && console.log('userEnrollCourse--', userEnrollCourse);
+		//userEnrollCourse && console.log('userEnrollCourse-', userEnrollCourse.length !== 0);
+	}, [userEnrollCourse]);
 	const checkIsChapterCompleted = (chapterId) => {
-		const result =
-			userEnrollment &&
-			userEnrollment[0]?.completedChapter.find((item) => item.chapterId == chapterId);
-		return result;
+		// const result =
+		// 	completeChapter && completeChapter.include((item) => item.chapterId == chapterId);
+		// console.log('--', completeChapter);
+		// return result;
 	};
 	return (
 		<View style={{ marginBottom: 30 }}>
 			<SectionHeading heading="Chapters" />
 			<FlatList
-				data={item?.chapter}
+				data={chapter}
 				renderItem={({ item, index }) => (
 					<TouchableOpacity
 						onPress={() => {
@@ -31,7 +37,7 @@ export default function LessonSection({
 						style={[
 							styles.container,
 							selectedChapter == item && { backgroundColor: Colors.PRIMARY_LIGHT },
-							checkIsChapterCompleted(item.id) && {
+							checkIsChapterCompleted(item.chapter_id) && {
 								backgroundColor: Colors.GREEN_LIGHT,
 							},
 						]}
@@ -50,7 +56,7 @@ export default function LessonSection({
 										textAlign: 'center',
 										color: Colors.PRIMARY,
 									},
-									checkIsChapterCompleted(item.id) && {
+									checkIsChapterCompleted(item.chapter_id) && {
 										color: Colors.GREEN,
 										backgroundColor: Colors.GREEN_LIGHT,
 									},
@@ -59,12 +65,12 @@ export default function LessonSection({
 								{++index}
 							</Text>
 							<Text numberOfLines={1} style={{ fontFamily: 'Outfit-SemiBold', fontSize: 14 }}>
-								{item.name}
+								{item.chapter_name}
 							</Text>
 						</View>
-						{checkIsChapterCompleted(item.id) ? (
+						{checkIsChapterCompleted(item.chapter_id) ? (
 							<Ionicons name="checkmark-circle" size={28} color={Colors.GREEN} />
-						) : userEnrollment != [] || index == 1 ? (
+						) : (userEnrollCourse && userEnrollCourse.length !== 0) || index == 1 ? (
 							<Ionicons name="play-circle" size={35} color={Colors.PRIMARY} />
 						) : (
 							<Ionicons name="lock-closed" size={28} color={Colors.GRAY} />

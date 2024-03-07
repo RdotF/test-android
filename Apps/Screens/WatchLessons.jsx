@@ -6,26 +6,66 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from './Utils/Colors';
 import LessonSection from '../Components/LessonSection';
 import { ScrollView } from 'react-native-gesture-handler';
-import GlobalAPI from './Utils/GlobalAPI';
 import { ReloadMethodsContext } from '../../App';
+import { useSQLiteContext } from 'expo-sqlite/next';
 
 export default function WatchLessons() {
 	const { params } = useRoute();
-	const [userEnrollment, setUserEnrollment] = useState(params?.userEnrollment);
+	const [userEnrollCourse, setuserEnrollCourse] = useState(params?.userEnrollCourse);
 	const [item, setItem] = useState(params?.item);
 	const [selectedChapter, setSelectedChapter] = useState();
 	const { reload, setReload } = useContext(ReloadMethodsContext);
+	const [lastId, setLastId] = useState();
+	const [completeChapter, setCompleteChapter] = useState();
 	const navigation = useNavigation();
-	useEffect(() => {
-		params && setSelectedChapter(params?.item?.chapter[0]);
-		params && setUserEnrollment(params?.userEnrollment);
-	}, [params && userEnrollment]);
 
+	const db = useSQLiteContext();
+	useEffect(() => {
+		params && setSelectedChapter(params?.chapter[0]);
+		params && setuserEnrollCourse(params?.userEnrollCourse);
+		db && getCompletedChapter();
+	}, [params && userEnrollCourse && db]);
+	const insertCompleteChapter = async () => {
+		try {
+			const result =
+				db &&
+				params &&
+				(await db.getAllAsync(
+					`INSERT INTO CompleteChapters (completeChapterId)
+      VALUES (?); SELECT last_insert_rowid() AS last_id;`,
+					[selectedChapter.chapter_id],
+				));
+			setLastId(result);
+			console.log(result);
+		} catch (er) {
+			console.log(er);
+		}
+	};
+	const getCompletedChapter = async () => {
+		try {
+			const result =
+				db &&
+				params &&
+				(await db.getAllAsync(
+					`INSERT INTO UEC_CC (uec_id_FK, cc_id_FK)
+          VALUES (1, 2); 
+          SELECT cc.completeChapterId
+          FROM CompleteChapters cc
+          JOIN UEC_CC ON cc.id = UEC_CC.cc_id_FK
+          JOIN UserEnrollCourse uec ON UEC_CC.uec_id_FK = uec.id
+          WHERE uec.id = ?;`,
+					[lastId],
+				));
+			setCompleteChapter(result);
+			console.log(completeChapter);
+		} catch (er) {
+			console.log(er);
+		}
+	};
 	const onChapterCompleted = () => {
-		GlobalAPI.markChapterCompleted(userEnrollment[0]?.id, selectedChapter.id).then((resp) => {
-			setReload('Update Enrollment ');
-			ToastAndroid.show('Chapter Completed!', ToastAndroid.SHORT);
-		});
+		db && insertCompleteChapter();
+		setReload('Update Enrollment ');
+		ToastAndroid.show('Chapter Completed!', ToastAndroid.SHORT);
 	};
 	return (
 		<ScrollView style={{ padding: 15 }}>
@@ -43,7 +83,7 @@ export default function WatchLessons() {
 				<Video
 					style={styles.video}
 					source={{
-						uri: selectedChapter.video?.url,
+						uri: selectedChapter.chapter_video_url,
 					}}
 					useNativeControls={true}
 					resizeMode={ResizeMode.CONTAIN}
@@ -61,7 +101,7 @@ export default function WatchLessons() {
 					}}
 				>
 					<Text style={{ fontFamily: 'Outfit-Bold', fontSize: 20, flex: 1 }}>
-						{selectedChapter.name}
+						{selectedChapter.chapter_name}
 					</Text>
 					<TouchableOpacity
 						onPress={() => onChapterCompleted()}
@@ -83,9 +123,11 @@ export default function WatchLessons() {
 
 			<LessonSection
 				item={item}
-				userEnrollment={userEnrollment}
+				userEnrollCourse={userEnrollCourse}
+				chapter={params?.chapter}
 				onChapterSelect={(chapter) => setSelectedChapter(chapter)}
 				selectedChapter={selectedChapter}
+				completeChapter={completeChapter}
 			/>
 		</ScrollView>
 	);

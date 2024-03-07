@@ -8,11 +8,7 @@ import ProgressBar from './ProgressBar';
 
 export default function ProgressCourseItem({ completedChapter, item }) {
 	const navigation = useNavigation();
-	useEffect(() => {
-		console.log('--', calculatePercCompleted());
-		console.log('completed', completedChapter);
-		console.log('chapter', item?.chapter?.length);
-	}, []);
+	useEffect(() => {}, []);
 	// total chapter
 	// Completed Chapter
 	const calculatePercCompleted = () => {
