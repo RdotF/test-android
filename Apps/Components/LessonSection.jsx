@@ -15,14 +15,16 @@ export default function LessonSection({
 	completeChapter,
 }) {
 	useEffect(() => {
-		//userEnrollCourse && console.log('userEnrollCourse--', userEnrollCourse);
-		//userEnrollCourse && console.log('userEnrollCourse-', userEnrollCourse.length !== 0);
+		completeChapter && console.log('completeChapter', completeChapter);
+		//chapter && console.log('chapter', chapter);
+		// userEnrollCourse && console.log('userEnrollCourse--', userEnrollCourse);
+		// userEnrollCourse && console.log('userEnrollCourse-', userEnrollCourse.length !== 0);
 	}, [userEnrollCourse]);
+
 	const checkIsChapterCompleted = (chapterId) => {
-		// const result =
-		// 	completeChapter && completeChapter.include((item) => item.chapterId == chapterId);
-		// console.log('--', completeChapter);
-		// return result;
+		const result =
+			completeChapter && completeChapter.find((item) => item.completeChapterId === chapterId);
+		return result !== undefined;
 	};
 	return (
 		<View style={{ marginBottom: 30 }}>
@@ -58,7 +60,7 @@ export default function LessonSection({
 									},
 									checkIsChapterCompleted(item.chapter_id) && {
 										color: Colors.GREEN,
-										backgroundColor: Colors.GREEN_LIGHT,
+										backgroundColor: Colors.WHITE,
 									},
 								]}
 							>

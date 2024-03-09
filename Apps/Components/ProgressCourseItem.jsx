@@ -5,20 +5,52 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import ProgressBar from './ProgressBar';
+import { useSQLiteContext } from 'expo-sqlite/next';
+import { useState } from 'react';
 
-export default function ProgressCourseItem({ completedChapter, item }) {
+export default function ProgressCourseItem({ completedChapter, userEnrollCourse }) {
 	const navigation = useNavigation();
-	useEffect(() => {}, []);
-	// total chapter
+	const [courseList, setCourseList] = useState();
+	const db = useSQLiteContext();
+	const uniqueChaptersCompleted = [
+		...new Set(completedChapter.map((chapter) => chapter.completeChapterId)),
+	].length;
+	useEffect(() => {
+		db && completedChapter && calculatePercCompleted();
+		db && getAllChapter();
+	}, [db, completedChapter]);
+	useEffect(() => {
+		userEnrollCourse && console.log('--', completedChapter);
+		db && console.log('courseList', courseList);
+	}, [userEnrollCourse, courseList]);
+
+	const getAllChapter = async () => {
+		try {
+			const result =
+				db &&
+				(await db.getAllAsync(`SELECT CourseList.*
+        FROM UserEnrollCourse
+        JOIN CourseList ON UserEnrollCourse.CourseList = CourseList.id
+        WHERE UserEnrollCourse.CourseId = "${userEnrollCourse[0].CourseId}";`));
+			setCourseList(result);
+		} catch (er) {
+			console.error(er);
+		}
+	};
 	// Completed Chapter
 	const calculatePercCompleted = () => {
-		// (completedChapter/totalChapterCompleted)*100
-		const result = item?.chapter?.length == 0 ? 0 : completedChapter / item?.chapter?.length;
-		return result.toFixed(2);
+		// Count unique chapters completed
+
+		// Calculate total chapters in the course
+		const totalChapters = courseList?.[0]?.totalChapter ?? 0;
+		// Calculate completion percentage
+		const completedPercentage = totalChapters === 0 ? 0 : uniqueChaptersCompleted / totalChapters;
+		console.log('perc', completedPercentage.toFixed(2));
+		return completedPercentage.toFixed(2);
 	};
 	return (
 		<TouchableOpacity
-			onPress={() => navigation.navigate('course-detail', { item: item })}
+			onPress={() => navigation.navigate('course-detail', { item: courseList[0] })}
 			style={{
 				backgroundColor: Colors.WHITE,
 				marginBottom: 10,
@@ -27,35 +59,36 @@ export default function ProgressCourseItem({ completedChapter, item }) {
 				marginTop: 5,
 			}}
 		>
-			<Image source={{ uri: item?.banner?.url }} style={{ borderRadius: 15, height: 180 }} />
+			<Image source={{ uri: courseList[0]?.banner }} style={{ borderRadius: 15, height: 180 }} />
 			<View>
 				<Text
 					style={{
-						fontSize: 18,
+						fontSize: 20,
 						fontFamily: 'Outfit-Medium',
 						marginTop: 5,
 						marginLeft: 3,
 						textAlign: 'left',
 					}}
 				>
-					{item?.name}
+					{courseList[0]?.name}
 				</Text>
-				{item?.chapter?.length ? (
+
+				{courseList[0]?.totalChapter ? (
 					<View
 						style={{
 							display: 'flex',
 							flexDirection: 'row',
-							alignItems: 'center',
+							alignItems: 'left',
 							justifyContent: 'space-between',
-							marginRight: 3,
+							marginLeft: 3,
 						}}
 					>
-						{/* <Ionicons name="bookmarks-sharp" size={20} color="black" /> */}
+						<Ionicons name="bookmarks-sharp" size={20} color="black" />
 						<Text
 							style={{
 								fontFamily: 'Outfit-SemiBold',
 								textAlign: 'center',
-								marginLeft: 3,
+								marginStart: -268,
 							}}
 						>
 							{calculatePercCompleted() * 100}%
@@ -67,7 +100,7 @@ export default function ProgressCourseItem({ completedChapter, item }) {
 								color: Colors.GREEN,
 							}}
 						>
-							{completedChapter}/{item.chapter?.length}
+							{uniqueChaptersCompleted}/{courseList[0]?.totalChapter}
 						</Text>
 					</View>
 				) : null}

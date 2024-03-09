@@ -14,13 +14,14 @@ import { useSQLiteContext } from 'expo-sqlite/next';
 
 export default function CourseDetailScreen() {
 	const { params } = useRoute();
-	const [item, setItem] = useState();
+	const [item, setItem] = useState({});
 	const [chapter, setChapter] = useState();
 	const navigation = useNavigation();
 	const { reload, setReload } = useContext(ReloadMethodsContext);
 	const [userEnrollCourse, setUserEnrollCourse] = useState();
-
+	const [completeChapter, setCompleteChapter] = useState([]);
 	const db = useSQLiteContext();
+
 	const InsertOnStart = async () => {
 		try {
 			const result =
@@ -31,6 +32,14 @@ export default function CourseDetailScreen() {
 					[item.slug, item.id],
 				));
 			setUserEnrollCourse(result);
+		} catch (er) {
+			console.log(er);
+		}
+	};
+	const getCompleteChapters = async () => {
+		try {
+			const result = db && (await db.getAllAsync(`select * from CompleteChapters;`));
+			setCompleteChapter(result);
 		} catch (er) {
 			console.log(er);
 		}
@@ -55,9 +64,9 @@ export default function CourseDetailScreen() {
 	useEffect(() => {
 		setItem(params.item);
 		setChapter(params.chapter);
-		console.log(userEnrollCourse);
+		getCompleteChapters();
 		params && checkIsUserStartedTheCourse(params.item);
-	}, [params]);
+	}, [params && db]);
 	useEffect(() => {
 		//db useEffect!!
 
@@ -125,7 +134,12 @@ export default function CourseDetailScreen() {
 				}
 			/>
 			{/* List of Chapters */}
-			<LessonSection item={item} userEnrollCourse={userEnrollCourse} chapter={chapter} />
+			<LessonSection
+				item={item}
+				userEnrollCourse={userEnrollCourse}
+				chapter={chapter}
+				completeChapter={completeChapter}
+			/>
 		</ScrollView>
 	);
 }

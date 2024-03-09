@@ -3,21 +3,47 @@ import React, { useEffect, useState } from 'react';
 import GlobalAPI from './Utils/GlobalAPI';
 import CourseItem from '../Components/CourseItem';
 import ProgressCourseItem from '../Components/ProgressCourseItem';
+import { useSQLiteContext } from 'expo-sqlite/next';
 
 export default function ProfileScreen() {
-	const [enrolledCoursesList, setEnrolledCoursesList] = useState();
+	const [enrolledCoursesList, setEnrolledCoursesList] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const getAllUserEnrollCourses = () => {
-		setIsLoading(true);
-		GlobalAPI.getAllUserEnrollCourses().then((resp) => {
-			setEnrolledCoursesList(resp.userEnrollCourses);
+	const [completeChapter, setCompleteChapter] = useState([]);
+	const db = useSQLiteContext();
+	// const getAllUserEnrollCourses = () => {
+	// 	setIsLoading(true);
+	// 	GlobalAPI.getAllUserEnrollCourses().then((resp) => {
+	// 		setEnrolledCoursesList(resp.userEnrollCourses);
+	// 		setIsLoading(false);
+	// 	});
+	// };
+	const getUserEnrollCourses = async () => {
+		try {
+			setIsLoading(true);
+			const result = db && (await db.getAllAsync(`select * from UserEnrollCourse;`));
+			setEnrolledCoursesList(result);
 			setIsLoading(false);
-		});
+		} catch (er) {
+			console.error(er);
+		}
+	};
+	const getCompleteChapters = async () => {
+		try {
+			const result = db && (await db.getAllAsync(`SELECT * FROM CompleteChapters;`));
+			setCompleteChapter(result);
+		} catch (er) {
+			console.log(er);
+		}
 	};
 	useEffect(() => {
-		getAllUserEnrollCourses();
-		//console.log(enrolledCoursesList.length);
-	}, []);
+		db && getUserEnrollCourses();
+		db && getCompleteChapters();
+		// getAllUserEnrollCourses();
+	}, [db]);
+	useEffect(() => {
+		// console.log('enrolledCoursesList', enrolledCoursesList);
+		// console.log('CompleteCha', completeChapter);
+	}, [enrolledCoursesList, completeChapter]);
 	return (
 		<View style={{ padding: 20, marginTop: 25 }}>
 			<Text
@@ -34,11 +60,11 @@ export default function ProfileScreen() {
 				data={enrolledCoursesList}
 				refreshing={isLoading}
 				showsVerticalScrollIndicator={false}
-				onRefresh={() => getAllUserEnrollCourses()}
+				onRefresh={() => getUserEnrollCourses()}
 				renderItem={({ item, index }) => (
 					<ProgressCourseItem
-						completedChapter={item?.completedChapter?.length}
-						item={item.courseList}
+						completedChapter={completeChapter}
+						userEnrollCourse={enrolledCoursesList}
 					/>
 				)}
 			/>

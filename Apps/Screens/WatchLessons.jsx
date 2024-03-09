@@ -13,59 +13,73 @@ export default function WatchLessons() {
 	const { params } = useRoute();
 	const [userEnrollCourse, setuserEnrollCourse] = useState(params?.userEnrollCourse);
 	const [item, setItem] = useState(params?.item);
-	const [selectedChapter, setSelectedChapter] = useState();
+	const [selectedChapter, setSelectedChapter] = useState([]);
 	const { reload, setReload } = useContext(ReloadMethodsContext);
-	const [lastId, setLastId] = useState();
-	const [completeChapter, setCompleteChapter] = useState();
-	const navigation = useNavigation();
 
+	const [completeChapter, setCompleteChapter] = useState([]);
+	const navigation = useNavigation();
+	//const [completeChapterUserEnroll, setCompleteChapterUserEnroll] = useState();
 	const db = useSQLiteContext();
 	useEffect(() => {
+		//deleteTable();
 		params && setSelectedChapter(params?.chapter[0]);
 		params && setuserEnrollCourse(params?.userEnrollCourse);
-		db && getCompletedChapter();
-	}, [params && userEnrollCourse && db]);
-	const insertCompleteChapter = async () => {
+	}, [params && userEnrollCourse && completeChapter]);
+	const deleteTable = async () => {
 		try {
-			const result =
-				db &&
-				params &&
-				(await db.getAllAsync(
-					`INSERT INTO CompleteChapters (completeChapterId)
-      VALUES (?); SELECT last_insert_rowid() AS last_id;`,
-					[selectedChapter.chapter_id],
-				));
-			setLastId(result);
-			console.log(result);
+			const resultDELETE = await db.execAsync(`CREATE TABLE IF NOT EXISTS "CompleteChapters" (
+        "id"	INTEGER NOT NULL,
+        "completeChapterId"	INTEGER,
+        PRIMARY KEY("id" AUTOINCREMENT)
+      );`);
+			const resultSELECT = await db.getAllAsync(`SELECT * FROM CompleteChapters`);
+			console.log('delete', resultSELECT);
+			setCompleteChapterUserEnroll(resultSELECT);
 		} catch (er) {
-			console.log(er);
+			console.error(er);
 		}
 	};
-	const getCompletedChapter = async () => {
+	const onChapterCompleted = async () => {
 		try {
-			const result =
-				db &&
-				params &&
-				(await db.getAllAsync(
-					`INSERT INTO UEC_CC (uec_id_FK, cc_id_FK)
-          VALUES (1, 2); 
-          SELECT cc.completeChapterId
-          FROM CompleteChapters cc
-          JOIN UEC_CC ON cc.id = UEC_CC.cc_id_FK
-          JOIN UserEnrollCourse uec ON UEC_CC.uec_id_FK = uec.id
-          WHERE uec.id = ?;`,
-					[lastId],
-				));
-			setCompleteChapter(result);
-			console.log(completeChapter);
-		} catch (er) {
-			console.log(er);
+			// Ensure that a chapter is selected
+			if (!selectedChapter) return;
+
+			// Insert the completed chapter into the CompleteChapters table
+			await db.execAsync(
+				`INSERT INTO CompleteChapters (completeChapterId) VALUES (${selectedChapter.chapter_id});`,
+			);
+
+			// Get the last inserted ID
+			const lastIdResult = await db.getAllAsync(`SELECT last_insert_rowid() AS last_id;`);
+			const lastId = lastIdResult[0]?.last_id;
+
+			// Insert the relationship between the user enrollment course and the completed chapter
+			if (lastId) {
+				await db.execAsync(
+					`INSERT INTO UEC_CC (uec_id_FK, cc_id_FK) VALUES (${params.userEnrollCourse[0].id}, ${lastId});`,
+				);
+
+				// Retrieve the list of completed chapters for the user enrollment course
+				const result = await db.getAllAsync(
+					`SELECT cc.id, cc.completeChapterId, uec_cc.uec_id_FK as enrollCourseId 
+              FROM CompleteChapters cc
+              JOIN UEC_CC uec_cc ON cc.id = uec_cc.cc_id_FK
+              WHERE uec_cc.uec_id_FK = ${params.userEnrollCourse[0].id};`,
+				);
+				setCompleteChapter(result);
+
+				setCompleteChapterUserEnroll(
+					result.map((row) => ({
+						id: row.id,
+						completeChapterId: row.completeChapterId,
+						enrollCourseId: row.enrollCourseId,
+					})),
+				);
+				ToastAndroid.show('Chapter Completed!', ToastAndroid.SHORT);
+			}
+		} catch (error) {
+			console.error('Error completing chapter:', error);
 		}
-	};
-	const onChapterCompleted = () => {
-		db && insertCompleteChapter();
-		setReload('Update Enrollment ');
-		ToastAndroid.show('Chapter Completed!', ToastAndroid.SHORT);
 	};
 	return (
 		<ScrollView style={{ padding: 15 }}>
