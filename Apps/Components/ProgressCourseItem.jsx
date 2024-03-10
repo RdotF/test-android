@@ -2,15 +2,15 @@ import { View, Text, Image } from 'react-native';
 import React, { useEffect } from 'react';
 import Colors from '../Screens/Utils/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+// import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native';
 import ProgressBar from './ProgressBar';
 import { useSQLiteContext } from 'expo-sqlite/next';
 import { useState } from 'react';
 
 export default function ProgressCourseItem({ completedChapter, userEnrollCourse }) {
-	const navigation = useNavigation();
-	const [courseList, setCourseList] = useState();
+	// const navigation = useNavigation();
+	const [courseList, setCourseList] = useState([]);
 	const db = useSQLiteContext();
 	const uniqueChaptersCompleted = [
 		...new Set(completedChapter.map((chapter) => chapter.completeChapterId)),
@@ -29,9 +29,9 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 			const result =
 				db &&
 				(await db.getAllAsync(`SELECT CourseList.*
-        FROM UserEnrollCourse
-        JOIN CourseList ON UserEnrollCourse.CourseList = CourseList.id
-        WHERE UserEnrollCourse.CourseId = "${userEnrollCourse[0].CourseId}";`));
+      FROM UserEnrollCourse
+      JOIN CourseList ON UserEnrollCourse.CourseList = CourseList.id
+      WHERE UserEnrollCourse.CourseId = "${userEnrollCourse[0].CourseId}";`));
 			setCourseList(result);
 		} catch (er) {
 			console.error(er);
@@ -48,9 +48,9 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 		console.log('perc', completedPercentage.toFixed(2));
 		return completedPercentage.toFixed(2);
 	};
+
 	return (
 		<TouchableOpacity
-			onPress={() => navigation.navigate('course-detail', { item: courseList[0] })}
 			style={{
 				backgroundColor: Colors.WHITE,
 				marginBottom: 10,

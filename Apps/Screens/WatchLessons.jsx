@@ -22,19 +22,29 @@ export default function WatchLessons() {
 	const db = useSQLiteContext();
 	useEffect(() => {
 		//deleteTable();
+		db && getCompleteChapter();
 		params && setSelectedChapter(params?.chapter[0]);
 		params && setuserEnrollCourse(params?.userEnrollCourse);
-	}, [params && userEnrollCourse && completeChapter]);
-	const deleteTable = async () => {
+	}, [db && params && userEnrollCourse]);
+	// const deleteTable = async () => {
+	// 	try {
+	// 		const resultDELETE = await db.execAsync(`CREATE TABLE IF NOT EXISTS "CompleteChapters" (
+	//       "id"	INTEGER NOT NULL,
+	//       "completeChapterId"	INTEGER,
+	//       PRIMARY KEY("id" AUTOINCREMENT)
+	//     );`);
+	// 		const resultSELECT = await db.getAllAsync(`SELECT * FROM CompleteChapters`);
+	// 		console.log('delete', resultSELECT);
+	// 		setCompleteChapterUserEnroll(resultSELECT);
+	// 	} catch (er) {
+	// 		console.error(er);
+	// 	}
+	// };
+	const getCompleteChapter = async () => {
 		try {
-			const resultDELETE = await db.execAsync(`CREATE TABLE IF NOT EXISTS "CompleteChapters" (
-        "id"	INTEGER NOT NULL,
-        "completeChapterId"	INTEGER,
-        PRIMARY KEY("id" AUTOINCREMENT)
-      );`);
-			const resultSELECT = await db.getAllAsync(`SELECT * FROM CompleteChapters`);
-			console.log('delete', resultSELECT);
-			setCompleteChapterUserEnroll(resultSELECT);
+			const result = db && (await db.getAllAsync(`SELECT * FROM CompleteChapters;`));
+			console.log(result);
+			setCompleteChapter(result);
 		} catch (er) {
 			console.error(er);
 		}

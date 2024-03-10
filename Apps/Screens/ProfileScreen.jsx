@@ -1,7 +1,5 @@
 import { View, Text, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import GlobalAPI from './Utils/GlobalAPI';
-import CourseItem from '../Components/CourseItem';
 import ProgressCourseItem from '../Components/ProgressCourseItem';
 import { useSQLiteContext } from 'expo-sqlite/next';
 
@@ -10,19 +8,12 @@ export default function ProfileScreen() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [completeChapter, setCompleteChapter] = useState([]);
 	const db = useSQLiteContext();
-	// const getAllUserEnrollCourses = () => {
-	// 	setIsLoading(true);
-	// 	GlobalAPI.getAllUserEnrollCourses().then((resp) => {
-	// 		setEnrolledCoursesList(resp.userEnrollCourses);
-	// 		setIsLoading(false);
-	// 	});
-	// };
 	const getUserEnrollCourses = async () => {
 		try {
 			setIsLoading(true);
 			const result = db && (await db.getAllAsync(`select * from UserEnrollCourse;`));
 			setEnrolledCoursesList(result);
-			setIsLoading(false);
+			db && setIsLoading(false);
 		} catch (er) {
 			console.error(er);
 		}

@@ -1,13 +1,13 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MyCourseScreen from '../MyCourseScreen';
+import FlashCardApp from '../FlashCardApp';
 import ProfileScreen from '../ProfileScreen';
 import FirstScreen from '../FirstScreen';
 import Colors from '../Utils/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import FirstScreenNavigation from './FirstScreenNavigation';
-
+import FlashCardNavigation from './FlashCardNavigation';
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation() {
@@ -23,15 +23,14 @@ export default function TabNavigation() {
 				}}
 			/>
 			{/* Default */}
-			{/* <Tab.Screen name="MyCourseScreen" component={MyCourseScreen} 
-     options={{
-      tabBarIcon:({color})=>(
-        <Ionicons name="book" size={24} color={color} />
-        ),
-        tabBarLabel:({color})=>(
-          <Text style={{color, marginBottom:2}}>Study</Text>
-        )
-    }}/> */}
+			<Tab.Screen
+				name="FlashCardApp"
+				component={FlashCardNavigation}
+				options={{
+					tabBarIcon: ({ color }) => <Ionicons name="book" size={24} color={color} />,
+					tabBarLabel: ({ color }) => <Text style={{ color, marginBottom: 2 }}>Study</Text>,
+				}}
+			/>
 			<Tab.Screen
 				name="ProfileScreen"
 				component={ProfileScreen}
