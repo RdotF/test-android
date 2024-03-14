@@ -4,37 +4,29 @@ import ProgressCourseItem from '../Components/ProgressCourseItem';
 import { useSQLiteContext } from 'expo-sqlite/next';
 
 export default function ProfileScreen() {
-	const [enrolledCoursesList, setEnrolledCoursesList] = useState([]);
+	const [enrolledCoursesList, setEnrolledCoursesList] = useState();
 	const [isLoading, setIsLoading] = useState(false);
-	const [completeChapter, setCompleteChapter] = useState([]);
+	const [completeChapter, setCompleteChapter] = useState();
 	const db = useSQLiteContext();
-	const getUserEnrollCourses = async () => {
-		try {
+
+	useEffect(() => {
+		const fetchData = async () => {
 			setIsLoading(true);
-			const result = db && (await db.getAllAsync(`select * from UserEnrollCourse;`));
-			setEnrolledCoursesList(result);
-			db && setIsLoading(false);
-		} catch (er) {
-			console.error(er);
-		}
-	};
-	const getCompleteChapters = async () => {
-		try {
-			const result = db && (await db.getAllAsync(`SELECT * FROM CompleteChapters;`));
-			setCompleteChapter(result);
-		} catch (er) {
-			console.log(er);
-		}
-	};
-	useEffect(() => {
-		db && getUserEnrollCourses();
-		db && getCompleteChapters();
-		// getAllUserEnrollCourses();
-	}, []);
-	useEffect(() => {
-		// db && console.log('enrolledCoursesList', enrolledCoursesList);
-		// console.log('CompleteCha', completeChapter);
-	}, [enrolledCoursesList, completeChapter]);
+			try {
+				const enrolledCourses = db && (await db.getAllAsync(`SELECT * FROM UserEnrollCourse;`));
+				const chapters = db && (await db.getAllAsync(`SELECT * FROM CompleteChapters;`));
+				setEnrolledCoursesList(enrolledCourses);
+				setCompleteChapter(chapters);
+			} catch (error) {
+				console.error('Error fetching data:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [db]);
+
 	return (
 		<View style={{ padding: 20, marginTop: 25 }}>
 			<Text
@@ -46,16 +38,16 @@ export default function ProfileScreen() {
 			>
 				My Progress
 			</Text>
-			{/* List of Course Enrollment */}
-			<FlatList
-				data={enrolledCoursesList}
-				refreshing={isLoading}
-				showsVerticalScrollIndicator={false}
-				onRefresh={() => getUserEnrollCourses()}
-				renderItem={({ item, index }) => (
-					<ProgressCourseItem completedChapter={completeChapter} userEnrollCourse={item} />
-				)}
-			/>
+			{/* Render the FlatList only when data has been fetched */}
+			{!isLoading && enrolledCoursesList && completeChapter && db && (
+				<FlatList
+					data={enrolledCoursesList}
+					showsVerticalScrollIndicator={false}
+					renderItem={({ item, index }) => (
+						<ProgressCourseItem completedChapter={completeChapter} userEnrollCourse={item} />
+					)}
+				/>
+			)}
 		</View>
 	);
 }

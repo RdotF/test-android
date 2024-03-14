@@ -1,5 +1,3 @@
-// ProgressCourseItem.tsx
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,18 +12,14 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 	const db = useSQLiteContext();
 
 	useEffect(() => {
-		if (completedChapter && userEnrollCourse) {
-			calculateUniqueChaptersCompleted();
+		if (completedChapter && userEnrollCourse && db) {
+			fetchData();
 		}
-	}, [completedChapter, userEnrollCourse]);
-	useEffect(() => {
-		db && userEnrollCourse && console.log('courseList[0]', courseList);
-		completedChapter && db && console.log('= poolOfChapters?.length', poolOfChapters?.length);
-	}, [userEnrollCourse, db, completedChapter]);
+	}, [completedChapter, userEnrollCourse, db]);
 
 	useEffect(() => {
-		db && userEnrollCourse && fetchData();
-	}, [db && userEnrollCourse]);
+		calculateUniqueChaptersCompleted();
+	}, [completedChapter, poolOfChapters]);
 
 	const fetchData = async () => {
 		try {
@@ -54,13 +48,15 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 	};
 
 	const calculateUniqueChaptersCompleted = () => {
-		const completedChaptersForCourse = completedChapter.filter((chapter) =>
-			poolOfChapters.includes(chapter.completeChapterId),
-		);
-		const uniqueChapters = new Set(
-			completedChaptersForCourse.map((chapter) => chapter.completeChapterId),
-		);
-		setUniqueChaptersCompleted(uniqueChapters.size);
+		if (completedChapter && poolOfChapters) {
+			const completedChaptersForCourse = completedChapter.filter((chapter) =>
+				poolOfChapters.includes(chapter.completeChapterId),
+			);
+			const uniqueChapters = new Set(
+				completedChaptersForCourse.map((chapter) => chapter.completeChapterId),
+			);
+			setUniqueChaptersCompleted(uniqueChapters.size);
+		}
 	};
 
 	const calculatePercCompleted = () => {
@@ -80,7 +76,9 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 				marginTop: 5,
 			}}
 		>
-			<Image source={{ uri: courseList[0]?.banner }} style={{ borderRadius: 15, height: 180 }} />
+			{courseList?.length > 0 && (
+				<Image source={{ uri: courseList[0]?.banner }} style={{ borderRadius: 15, height: 180 }} />
+			)}
 			<View>
 				<Text
 					style={{
