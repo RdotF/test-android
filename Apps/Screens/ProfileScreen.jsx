@@ -30,9 +30,9 @@ export default function ProfileScreen() {
 		db && getUserEnrollCourses();
 		db && getCompleteChapters();
 		// getAllUserEnrollCourses();
-	}, [db]);
+	}, []);
 	useEffect(() => {
-		// console.log('enrolledCoursesList', enrolledCoursesList);
+		// db && console.log('enrolledCoursesList', enrolledCoursesList);
 		// console.log('CompleteCha', completeChapter);
 	}, [enrolledCoursesList, completeChapter]);
 	return (
@@ -53,10 +53,7 @@ export default function ProfileScreen() {
 				showsVerticalScrollIndicator={false}
 				onRefresh={() => getUserEnrollCourses()}
 				renderItem={({ item, index }) => (
-					<ProgressCourseItem
-						completedChapter={completeChapter}
-						userEnrollCourse={enrolledCoursesList}
-					/>
+					<ProgressCourseItem completedChapter={completeChapter} userEnrollCourse={item} />
 				)}
 			/>
 		</View>

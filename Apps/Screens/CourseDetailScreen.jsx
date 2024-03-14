@@ -26,12 +26,12 @@ export default function CourseDetailScreen() {
 		try {
 			const result =
 				db &&
-				(await db.getAllAsync(
+				(await db.execAsync(
 					`INSERT INTO UserEnrollCourse (CourseId, CourseList)
-			VALUES (?, ?); SELECT * FROM UserEnrollCourse`,
+			VALUES (?, ?);`,
 					[item.slug, item.id],
 				));
-			setUserEnrollCourse(result);
+			getCompleteChapters();
 		} catch (er) {
 			console.log(er);
 		}
@@ -64,14 +64,13 @@ export default function CourseDetailScreen() {
 	useEffect(() => {
 		setItem(params.item);
 		setChapter(params.chapter);
-		getCompleteChapters();
+		db && getUserEnrollCourse();
 		params && checkIsUserStartedTheCourse(params.item);
 	}, [params && db]);
 	useEffect(() => {
 		//db useEffect!!
-
-		db && getUserEnrollCourse();
 		reload && checkIsUserStartedTheCourse();
+		getCompleteChapters();
 	}, [db && reload]);
 	const checkIsUserStartedTheCourse = async (item) => {
 		try {

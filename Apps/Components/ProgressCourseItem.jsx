@@ -1,51 +1,72 @@
-import { View, Text, Image } from 'react-native';
-import React, { useEffect } from 'react';
-import Colors from '../Screens/Utils/Colors';
+// ProgressCourseItem.tsx
+
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// import { useNavigation } from '@react-navigation/native';
-import { TouchableOpacity } from 'react-native';
+import Colors from '../Screens/Utils/Colors';
 import ProgressBar from './ProgressBar';
 import { useSQLiteContext } from 'expo-sqlite/next';
-import { useState } from 'react';
 
 export default function ProgressCourseItem({ completedChapter, userEnrollCourse }) {
-	// const navigation = useNavigation();
 	const [courseList, setCourseList] = useState([]);
+	const [poolOfChapters, setPoolOfChapters] = useState([]);
+	const [uniqueChaptersCompleted, setUniqueChaptersCompleted] = useState(0);
 	const db = useSQLiteContext();
-	const uniqueChaptersCompleted = [
-		...new Set(completedChapter.map((chapter) => chapter.completeChapterId)),
-	].length;
-	useEffect(() => {
-		db && completedChapter && calculatePercCompleted();
-		db && getAllChapter();
-	}, [db, completedChapter]);
-	useEffect(() => {
-		userEnrollCourse && console.log('--', completedChapter);
-		db && console.log('courseList', courseList);
-	}, [userEnrollCourse, courseList]);
 
-	const getAllChapter = async () => {
+	useEffect(() => {
+		if (completedChapter && userEnrollCourse) {
+			calculateUniqueChaptersCompleted();
+		}
+	}, [completedChapter, userEnrollCourse]);
+	useEffect(() => {
+		db && userEnrollCourse && console.log('courseList[0]', courseList);
+		completedChapter && db && console.log('= poolOfChapters?.length', poolOfChapters?.length);
+	}, [userEnrollCourse, db, completedChapter]);
+
+	useEffect(() => {
+		db && userEnrollCourse && fetchData();
+	}, [db && userEnrollCourse]);
+
+	const fetchData = async () => {
 		try {
-			const result =
+			const courseListResult =
 				db &&
-				(await db.getAllAsync(`SELECT CourseList.*
-      FROM UserEnrollCourse
-      JOIN CourseList ON UserEnrollCourse.CourseList = CourseList.id
-      WHERE UserEnrollCourse.CourseId = "${userEnrollCourse[0].CourseId}";`));
-			setCourseList(result);
-		} catch (er) {
-			console.error(er);
+				(await db.getAllAsync(`
+          SELECT *
+          FROM CourseList
+          WHERE slug = "${userEnrollCourse.CourseId}";
+        `));
+			setCourseList(courseListResult);
+
+			const poolOfChaptersResult =
+				db &&
+				(await db.getAllAsync(`
+          SELECT Chapter.*
+          FROM Chapter
+          JOIN CL_Chapter ON Chapter.id = CL_Chapter.chapter_id_FK
+          JOIN CourseList ON CL_Chapter.CL_id_FK = CourseList.id
+          WHERE CourseList.slug = "${userEnrollCourse.CourseId}";
+        `));
+			setPoolOfChapters(poolOfChaptersResult.map((chapter) => chapter.id));
+		} catch (error) {
+			console.error(error);
 		}
 	};
-	// Completed Chapter
-	const calculatePercCompleted = () => {
-		// Count unique chapters completed
 
-		// Calculate total chapters in the course
-		const totalChapters = courseList?.[0]?.totalChapter ?? 0;
-		// Calculate completion percentage
+	const calculateUniqueChaptersCompleted = () => {
+		const completedChaptersForCourse = completedChapter.filter((chapter) =>
+			poolOfChapters.includes(chapter.completeChapterId),
+		);
+		const uniqueChapters = new Set(
+			completedChaptersForCourse.map((chapter) => chapter.completeChapterId),
+		);
+		setUniqueChaptersCompleted(uniqueChapters.size);
+	};
+
+	const calculatePercCompleted = () => {
+		const totalChapters = poolOfChapters?.length ?? 0;
 		const completedPercentage = totalChapters === 0 ? 0 : uniqueChaptersCompleted / totalChapters;
-		console.log('perc', completedPercentage.toFixed(2));
+
 		return completedPercentage.toFixed(2);
 	};
 
@@ -72,8 +93,7 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 				>
 					{courseList[0]?.name}
 				</Text>
-
-				{courseList[0]?.totalChapter ? (
+				{courseList?.length ? (
 					<View
 						style={{
 							display: 'flex',
@@ -100,7 +120,7 @@ export default function ProgressCourseItem({ completedChapter, userEnrollCourse 
 								color: Colors.GREEN,
 							}}
 						>
-							{uniqueChaptersCompleted}/{courseList[0]?.totalChapter}
+							{uniqueChaptersCompleted}/{poolOfChapters?.length}
 						</Text>
 					</View>
 				) : null}
