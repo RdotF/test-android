@@ -27,10 +27,13 @@ const FlashcardUnitForm = ({ onCreateUnit }) => {
 		<View style={{ alignItems: 'center', padding: 20 }}>
 			<SectionHeading heading={'Create a new Unit'} />
 			<TextInput
-				placeholder="Flashcard Unit Name"
+				placeholder="Unit Name"
 				value={unitName}
 				onChangeText={setUnitName}
 				style={inputStyles}
+				textAlignVertical={'center'}
+				textAlign={'center'}
+				multiline={true}
 			/>
 			<TouchableOpacity onPress={handleCreateUnit} style={buttonStyles.primary}>
 				<Text style={buttonStyles.text}>Create Unit</Text>
@@ -42,8 +45,7 @@ const FlashcardUnitForm = ({ onCreateUnit }) => {
 const inputStyles = {
 	backgroundColor: Colors.WHITE,
 	width: Dimensions.get('window').width * 0.8,
-	paddingVertical: 15, // Adjust based on the platform
-	paddingHorizontal: 80,
+	padding: 18,
 	borderRadius: 10,
 	marginBottom: 20,
 	fontSize: 18,

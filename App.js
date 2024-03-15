@@ -7,8 +7,10 @@ export const ReloadMethodsContext = createContext();
 export const openDbContext = createContext();
 import Connection from './Apps/DB/Connection';
 import {SQLiteProvider} from 'expo-sqlite/next';
-
+import {LogBox} from 'react-native';
+LogBox.ignoreAllLogs();
 export default function App() {
+ 
   const [fontsLoaded, fontError] = useFonts({
     'Outfit-Regular':require('./assets/fonts/Outfit-Regular.ttf'),
     'Outfit-Medium':require('./assets/fonts/Outfit-Medium.ttf'),

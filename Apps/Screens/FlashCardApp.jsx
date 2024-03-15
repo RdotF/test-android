@@ -57,11 +57,11 @@ const FlashCardApp = () => {
 	};
 
 	return (
-		<ScrollView contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingTop: 40 }}>
+		<ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 40 }}>
 			{currentUnit ? (
 				<>
 					<Text style={{ fontFamily: 'Outfit-Bold', fontSize: 24, marginBottom: 20 }}>
-						{currentUnit}
+						{currentUnit} {''}
 					</Text>
 					<TouchableOpacity
 						onPress={() => handleReview(currentUnit)}

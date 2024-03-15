@@ -28,11 +28,13 @@ const WordForm = ({ unitName }) => {
 				placeholder="German Word"
 				value={germanWord}
 				onChangeText={setGermanWord}
+				textAlignVertical={'center'}
+				textAlign={'center'}
+				multiline={true}
 				style={{
 					backgroundColor: Colors.WHITE,
 					width: '80%',
-					paddingVertical: 10,
-					paddingHorizontal: 120,
+					padding: 10,
 					borderRadius: 10,
 					marginBottom: 10,
 					width: Dimensions.get('window').width * 0.8,
@@ -42,11 +44,13 @@ const WordForm = ({ unitName }) => {
 				placeholder="English Translation"
 				value={englishWord}
 				onChangeText={setEnglishWord}
+				textAlignVertical={'center'}
+				textAlign={'center'}
+				multiline={true}
 				style={{
 					backgroundColor: Colors.WHITE,
 					width: '80%',
-					paddingVertical: 10,
-					paddingHorizontal: 105,
+					padding: 10,
 					borderRadius: 10,
 					marginBottom: 10,
 					width: Dimensions.get('window').width * 0.8,
