@@ -2,16 +2,6 @@
 <h3>Прошу для большего понимания просматривать только те файлы, которые указаны в лабораторной работе</h3>
 
 <p>
-  <h4><b>Путь к JSX файлам</b></h4> </p>
- <p> <b>Подключение: </b> Apps -> DB -> Connection.js </p>
-<p>  <b>SELECT: </b> Apps -> Screens -> FirstScreen.jsx </p>
- <p> <b>Отображение данных</b> Apps -> Components -> CategoryList.tsx </p>
- <p> <b>INSERT & SELECT</b> Apps -> Screens -> CourseDetailScreen.jsx </p>
-<p>  <b>Отображение данных (кнопка) </b> Apps -> Components -> StartCourse.jsx
+  Написан на React Native JS (+Typescript) с SQLite для БД. 
 </p>
-<p>
-  <h2>
-    Для просмотра всех таблиц и внесенных данных:
-  </h2>
-  <h3>assets -> reactMyApp.db.sql</h3>
-</p>
+<p>Таблицы БД можно посмотреть в папке assets -> reactMyApp.db.sql</p>
