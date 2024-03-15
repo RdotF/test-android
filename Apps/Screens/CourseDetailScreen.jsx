@@ -28,14 +28,14 @@ export default function CourseDetailScreen() {
 				db &&
 				(await db.execAsync(
 					`INSERT INTO UserEnrollCourse (CourseId, CourseList)
-			VALUES (?, ?);`,
-					[item.slug, item.id],
+			VALUES ("${item.slug}", ${item.id});`,
 				));
 			getCompleteChapters();
 		} catch (er) {
 			console.log(er);
 		}
 	};
+
 	const getCompleteChapters = async () => {
 		try {
 			const result = db && (await db.getAllAsync(`select * from CompleteChapters;`));
@@ -52,11 +52,39 @@ export default function CourseDetailScreen() {
 					`SELECT UserEnrollCourse.*
       FROM UserEnrollCourse
       JOIN CourseList ON UserEnrollCourse.CourseList = CourseList.id
-      WHERE CourseList.id = ?;`,
-					[params.item.id],
+      WHERE CourseList.id = ${params.item.id};`,
 				));
 
 			setUserEnrollCourse(result);
+		} catch (er) {
+			console.log(er);
+		}
+	};
+	const deleteFunction = async () => {
+		try {
+			const result =
+				db &&
+				(await db.execAsync(`CREATE TABLE IF NOT EXISTS "UEC_CC" (
+        "id"	INTEGER,
+        "uec_id_FK"	INTEGER,
+        "cc_id_FK"	INTEGER,
+        PRIMARY KEY("id" AUTOINCREMENT),
+        FOREIGN KEY("cc_id_FK") REFERENCES "CompleteChapters"("id"),
+        FOREIGN KEY("uec_id_FK") REFERENCES "UserEnrollCourse"("id")
+      );
+      CREATE TABLE IF NOT EXISTS "UserEnrollCourse" (
+        "id"	INTEGER NOT NULL,
+        "CourseId"	TEXT,
+        "CourseList"	INTEGER,
+        PRIMARY KEY("id" AUTOINCREMENT),
+        FOREIGN KEY("CourseList") REFERENCES "CourseList"("id")
+      );
+      CREATE TABLE IF NOT EXISTS "CompleteChapters" (
+        "id"	INTEGER NOT NULL,
+        "completeChapterId"	INTEGER,
+        PRIMARY KEY("id" AUTOINCREMENT)
+      );`));
+			getCompleteChapters();
 		} catch (er) {
 			console.log(er);
 		}
@@ -68,6 +96,8 @@ export default function CourseDetailScreen() {
 		params && checkIsUserStartedTheCourse(params.item);
 	}, [params && db]);
 	useEffect(() => {
+		//db && deleteFunction();
+		console.log('UserEnrollCOurse', userEnrollCourse);
 		//db useEffect!!
 		reload && checkIsUserStartedTheCourse();
 		getCompleteChapters();
@@ -85,8 +115,7 @@ export default function CourseDetailScreen() {
       FROM UserEnrollCourse uec
       JOIN UEC_CC ON uec.id = UEC_CC.uec_id_FK
       JOIN CompleteChapters cc ON UEC_CC.cc_id_FK = cc.id
-      WHERE uec.CourseList = ?;`,
-					[params.item.id],
+      WHERE uec.CourseList = ${params.item.id};`,
 				));
 			setUserEnrollCourse(result);
 		} catch (er) {
@@ -96,7 +125,8 @@ export default function CourseDetailScreen() {
 
 	const onStartPress = () => {
 		db && userEnrollCourse && InsertOnStart();
-		if (userEnrollCourse?.length > 0) {
+		const enrolledCourse = getUserEnrollCourse();
+		if (enrolledCourse?.length > 0) {
 			Alert.alert('Great!', 'You have just enrolled to new course!', [
 				{ text: 'Ok', onPress: () => console.log('Ok Press'), style: 'cancel' },
 			]);
