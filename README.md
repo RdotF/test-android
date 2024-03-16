@@ -5,3 +5,4 @@
   Написан на React Native JS (+Typescript) с SQLite для БД. 
 </p>
 <p>Таблицы БД можно посмотреть в папке assets -> reactMyApp.db.sql</p>
+![image](https://github.com/RdotF/test-android/assets/129058557/640b8723-2875-45f7-ba0b-449ca0c3ae58)
